@@ -1,5 +1,5 @@
 plugins {
-    id("fabric-loom")
+    id("net.fabricmc.fabric-loom")
     alias(libs.plugins.shadow)
 }
 
@@ -7,9 +7,8 @@ val shade: Configuration by configurations.creating
 
 dependencies {
     minecraft(libs.minecraft)
-    mappings(loom.officialMojangMappings())
-    modImplementation(libs.fabric.loader)
-    modImplementation(libs.fabric.api)
+    implementation(libs.fabric.loader)
+    implementation(libs.fabric.api)
 
     shadeModule(projects.signedvelocityBackendCommon)
     shadeModule(projects.signedvelocityShared)
@@ -33,13 +32,22 @@ tasks {
             expand("version" to project.version)
         }
     }
-    remapJar {
-        inputFile.set(shadowJar.get().archiveFile)
+    jar {
         archiveFileName.set("${rootProject.name}-Fabric-${project.version}.jar")
         destinationDirectory.set(file("${rootProject.projectDir}/build"))
     }
 }
 
+// Minecraft 26.1.2 ships Java 25 bytecode and Loom requires a JDK 25, so this
+// module overrides the Java 21 toolchain/target used by the rest of the project.
 java {
     withSourcesJar()
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(25))
+        vendor.set(JvmVendorSpec.AZUL)
+    }
+}
+
+tasks.withType<JavaCompile> {
+    options.release.set(25)
 }

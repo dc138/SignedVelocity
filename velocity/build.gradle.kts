@@ -8,6 +8,9 @@ plugins {
 dependencies {
     compileOnly(libs.velocity.api)
     compileOnly(libs.velocity.proxy)
+    // Velocity ships fastutil at runtime; required on the compile classpath so javac
+    // can resolve type annotations on velocity-proxy packet classes.
+    compileOnly(libs.fastutil)
     annotationProcessor(libs.velocity.api)
     implementation(libs.bstats)
 
